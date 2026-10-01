@@ -1,0 +1,448 @@
+{
+ "model": "jev-latest",
+ "captured": "2026-10-01",
+ "presets": [
+  {
+   "id": "support",
+   "label": "Support email",
+   "icon": "\u2709",
+   "blurb": "Route it, rank its urgency, decide if a human is needed.",
+   "request": {
+    "state": "I was charged twice for my annual plan this morning and I have emailed support three times with no reply. If this is not fixed today I am disputing the charge with my bank and cancelling.",
+    "model": "jev-latest",
+    "questions": {
+     "route": {
+      "type": "choice",
+      "instructions": "Route this support message to the right team.",
+      "criteria": {
+       "billing": "charges, refunds, invoices, payment methods",
+       "technical": "bugs, errors, outages, things not working",
+       "account": "login, access, profile, security",
+       "general": "anything else"
+      }
+     },
+     "urgency": {
+      "type": "score",
+      "instructions": "How urgent is this for the support team?",
+      "criteria": [
+       "Can wait a few days",
+       "Handle this week",
+       "Handle today",
+       "Drop everything"
+      ]
+     },
+     "needs_human": {
+      "type": "noul",
+      "instructions": "Does this need a human agent rather than an automated reply?"
+     },
+     "churn_risk": {
+      "type": "noul",
+      "instructions": "Is this customer at risk of cancelling or churning?",
+      "criteria": {
+       "true": "They threaten to leave, dispute, or cancel",
+       "false": "They are patient and staying"
+      }
+     }
+    }
+   },
+   "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+     "route": {
+      "type": "choice",
+      "choice": "billing",
+      "confidence": 1.0,
+      "probabilities": {
+       "billing": 1.0,
+       "technical": 0.0,
+       "general": 0.0,
+       "account": 0.0
+      }
+     },
+     "urgency": {
+      "type": "score",
+      "score": 2.28,
+      "confidence": 0.72,
+      "legend": {
+       "0": "Can wait a few days",
+       "1": "Handle this week",
+       "2": "Handle today",
+       "3": "Drop everything"
+      },
+      "probabilities": {
+       "0": 0.0,
+       "1": 0.0,
+       "2": 0.72,
+       "3": 0.28
+      }
+     },
+     "needs_human": {
+      "type": "noul",
+      "noul": 0.92
+     },
+     "churn_risk": {
+      "type": "noul",
+      "noul": 0.98
+     }
+    },
+    "usage": {
+     "input_tokens": 518,
+     "output_tokens": 97
+    }
+   },
+   "latency_ms": 1089
+  },
+  {
+   "id": "review",
+   "label": "Product review",
+   "icon": "\u2605",
+   "blurb": "Grade sentiment, tag the topic, flag a real defect.",
+   "request": {
+    "state": "Battery life is incredible and the screen is gorgeous, honestly the best phone I have owned. But mine arrived with a dead pixel in the top corner and the replacement took two weeks to ship. Still, I would buy it again.",
+    "model": "jev-latest",
+    "questions": {
+     "sentiment": {
+      "type": "score",
+      "instructions": "Rate the overall sentiment of this review.",
+      "criteria": [
+       "Very negative",
+       "Negative",
+       "Mixed",
+       "Positive",
+       "Very positive"
+      ]
+     },
+     "topic": {
+      "type": "choice",
+      "instructions": "What is the main topic the reviewer focuses on?",
+      "criteria": {
+       "quality": "build quality, defects, reliability",
+       "performance": "speed, battery, screen, features working well",
+       "shipping": "delivery, packaging, returns",
+       "price": "cost, value for money"
+      }
+     },
+     "has_defect": {
+      "type": "noul",
+      "instructions": "Does the reviewer report a physical defect or hardware fault with the product?"
+     },
+     "would_recommend": {
+      "type": "noul",
+      "instructions": "Would this reviewer recommend the product to others?"
+     }
+    }
+   },
+   "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+     "topic": {
+      "type": "choice",
+      "choice": "performance",
+      "confidence": 0.73,
+      "probabilities": {
+       "price": 0.0,
+       "shipping": 0.0,
+       "performance": 0.8,
+       "quality": 0.2
+      }
+     },
+     "has_defect": {
+      "type": "noul",
+      "noul": 0.98
+     },
+     "would_recommend": {
+      "type": "noul",
+      "noul": 0.86
+     },
+     "sentiment": {
+      "type": "score",
+      "score": 2.9,
+      "confidence": 0.88,
+      "legend": {
+       "0": "Very negative",
+       "1": "Negative",
+       "2": "Mixed",
+       "3": "Positive",
+       "4": "Very positive"
+      },
+      "probabilities": {
+       "0": 0.0,
+       "1": 0.0,
+       "2": 0.12,
+       "3": 0.86,
+       "4": 0.02
+      }
+     }
+    },
+    "usage": {
+     "input_tokens": 491,
+     "output_tokens": 97
+    }
+   },
+   "latency_ms": 848
+  },
+  {
+   "id": "social",
+   "label": "Social mention",
+   "icon": "\u25c6",
+   "blurb": "Read intent, gauge brand risk, catch sarcasm.",
+   "request": {
+    "state": "oh wow another 'scheduled maintenance' from @acmecloud right in the middle of our launch. third time this month. truly world class reliability, love it here \ud83d\ude43",
+    "model": "jev-latest",
+    "questions": {
+     "intent": {
+      "type": "choice",
+      "instructions": "What is the author's intent?",
+      "criteria": {
+       "complaint": "expressing frustration or a problem",
+       "praise": "genuine positive feedback",
+       "question": "asking for help or information",
+       "spam": "unrelated promotion or junk"
+      }
+     },
+     "brand_risk": {
+      "type": "score",
+      "instructions": "How much reputational risk does this post carry for the brand if left unanswered?",
+      "criteria": [
+       "None",
+       "Low",
+       "Moderate",
+       "High",
+       "Severe"
+      ]
+     },
+     "is_sarcastic": {
+      "type": "noul",
+      "instructions": "Is the praise in this post sarcastic rather than sincere?"
+     },
+     "needs_response": {
+      "type": "noul",
+      "instructions": "Should the brand's social team respond to this publicly?"
+     }
+    }
+   },
+   "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+     "intent": {
+      "type": "choice",
+      "choice": "complaint",
+      "confidence": 1.0,
+      "probabilities": {
+       "praise": 0.0,
+       "complaint": 1.0,
+       "question": 0.0,
+       "spam": 0.0
+      }
+     },
+     "brand_risk": {
+      "type": "score",
+      "score": 2.57,
+      "confidence": 0.64,
+      "legend": {
+       "0": "None",
+       "1": "Low",
+       "2": "Moderate",
+       "3": "High",
+       "4": "Severe"
+      },
+      "probabilities": {
+       "0": 0.0,
+       "1": 0.02,
+       "2": 0.38,
+       "3": 0.6,
+       "4": 0.0
+      }
+     },
+     "is_sarcastic": {
+      "type": "noul",
+      "noul": 0.99
+     },
+     "needs_response": {
+      "type": "noul",
+      "noul": 0.78
+     }
+    },
+    "usage": {
+     "input_tokens": 490,
+     "output_tokens": 101
+    }
+   },
+   "latency_ms": 834
+  },
+  {
+   "id": "pr",
+   "label": "Pull request",
+   "icon": "\u2325",
+   "blurb": "Classify the change, set review priority, flag security.",
+   "request": {
+    "state": "Replace the hand-rolled JWT parsing in auth/middleware.py with the vetted PyJWT library, and switch the session cookie to SameSite=Strict. Adds two unit tests. Fixes the token-confusion issue reported last week.",
+    "model": "jev-latest",
+    "questions": {
+     "change_type": {
+      "type": "choice",
+      "instructions": "Classify the primary type of this pull request.",
+      "criteria": {
+       "feature": "adds new user-facing capability",
+       "bugfix": "fixes incorrect behaviour",
+       "security": "fixes or hardens a security issue",
+       "refactor": "restructures code without changing behaviour",
+       "docs": "documentation or comments only"
+      }
+     },
+     "review_priority": {
+      "type": "score",
+      "instructions": "How urgently should a senior engineer review this?",
+      "criteria": [
+       "Routine",
+       "Normal",
+       "Soon",
+       "Review before next deploy"
+      ]
+     },
+     "touches_auth": {
+      "type": "noul",
+      "instructions": "Does this change touch authentication, authorization, or session security?"
+     },
+     "has_tests": {
+      "type": "noul",
+      "instructions": "Does the author mention adding or updating tests?"
+     }
+    }
+   },
+   "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+     "change_type": {
+      "type": "choice",
+      "choice": "security",
+      "confidence": 0.99,
+      "probabilities": {
+       "feature": 0.0,
+       "refactor": 0.0,
+       "security": 0.99,
+       "bugfix": 0.01,
+       "docs": 0.0
+      }
+     },
+     "review_priority": {
+      "type": "score",
+      "score": 2.94,
+      "confidence": 0.94,
+      "legend": {
+       "0": "Routine",
+       "1": "Normal",
+       "2": "Soon",
+       "3": "Review before next deploy"
+      },
+      "probabilities": {
+       "0": 0.0,
+       "1": 0.01,
+       "2": 0.04,
+       "3": 0.95
+      }
+     },
+     "touches_auth": {
+      "type": "noul",
+      "noul": 0.99
+     },
+     "has_tests": {
+      "type": "noul",
+      "noul": 0.99
+     }
+    },
+    "usage": {
+     "input_tokens": 509,
+     "output_tokens": 106
+    }
+   },
+   "latency_ms": 815
+  },
+  {
+   "id": "incident",
+   "label": "Incident alert",
+   "icon": "\u25b2",
+   "blurb": "Score severity, pin the component, decide whether to page.",
+   "request": {
+    "state": "[2026-10-01 03:14 UTC] checkout-service p99 latency 8200ms (baseline 240ms), 37% of /charge calls returning 503, upstream payments-gateway connection pool exhausted. Error rate climbing for 6 minutes.",
+    "model": "jev-latest",
+    "questions": {
+     "severity": {
+      "type": "score",
+      "instructions": "Rate the severity of this incident.",
+      "criteria": [
+       "Informational",
+       "Minor degradation",
+       "Major degradation",
+       "Critical outage"
+      ]
+     },
+     "component": {
+      "type": "choice",
+      "instructions": "Which component is the likely root cause?",
+      "criteria": {
+       "payments": "payment gateway or charge pipeline",
+       "database": "database or data store",
+       "network": "networking, DNS, load balancer",
+       "frontend": "web or mobile client"
+      }
+     },
+     "page_oncall": {
+      "type": "noul",
+      "instructions": "Should this immediately page the on-call engineer?"
+     },
+     "customer_facing": {
+      "type": "noul",
+      "instructions": "Is this incident directly affecting paying customers right now?"
+     }
+    }
+   },
+   "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+     "severity": {
+      "type": "score",
+      "score": 2.77,
+      "confidence": 0.77,
+      "legend": {
+       "0": "Informational",
+       "1": "Minor degradation",
+       "2": "Major degradation",
+       "3": "Critical outage"
+      },
+      "probabilities": {
+       "0": 0.0,
+       "1": 0.0,
+       "2": 0.23,
+       "3": 0.77
+      }
+     },
+     "component": {
+      "type": "choice",
+      "choice": "payments",
+      "confidence": 1.0,
+      "probabilities": {
+       "database": 0.0,
+       "frontend": 0.0,
+       "network": 0.0,
+       "payments": 1.0
+      }
+     },
+     "page_oncall": {
+      "type": "noul",
+      "noul": 0.94
+     },
+     "customer_facing": {
+      "type": "noul",
+      "noul": 0.94
+     }
+    },
+    "usage": {
+     "input_tokens": 503,
+     "output_tokens": 95
+    }
+   },
+   "latency_ms": 855
+  }
+ ]
+}
