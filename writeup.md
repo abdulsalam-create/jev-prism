@@ -20,7 +20,11 @@ Now you are parsing. You prompt for JSON, you validate the shape, you handle the
 
 ## Meet the decision-only model
 
-[Jev](https://typesafe.ai) (TypeSafe's "System One" model) skips the prose entirely. You give it some text and a set of typed questions, and it answers in types. There are three:
+[Jev](https://typesafe.ai) (TypeSafe's "System One" model) skips the prose entirely. You give it some text and a set of typed questions, and it answers in types.
+
+The name is not an accident. In Daniel Kahneman's *Thinking, Fast and Slow*, **System 1** is the fast, automatic, intuitive mind: the part that reads a short message and just *knows*, with no deliberate reasoning. **System 2** is the slow, effortful mind you use for long division or weighing a hard choice. Most models we reach for behave like System 2: they deliberate, they explain, they take their time. Jev is deliberately System 1: a snap judgment, returned as a type, in a few hundred milliseconds. For triage you do not want a System 2 essay agonising over a ticket. You want a fast, confident reflex, and then your own code decides what to do with it.
+
+There are three primitives:
 
 - **`choice`** picks one labelled option. You get the chosen option, a probability for every option, and a confidence.
 - **`score`** rates against an ordered rubric. You get a number that can land *between* the levels, weighted by the probabilities.
@@ -160,6 +164,8 @@ This is not a chat model, and pretending otherwise will burn you:
 
 It shines when the model's answer becomes an `if` or a `switch`: routing, triage, moderation, scoring, gating, prioritisation. Anything where you were about to parse a label out of prose.
 
+The real pattern is to use both minds. Let a fast System 1 model like Jev make the snap, typed decisions, and reserve a slow System 2 model (a large reasoning or generative model) for the work that genuinely needs deliberation, like writing the actual reply to the customer. Cheap reflex up front, expensive thought only where it earns its keep. Kahneman's whole point was that a healthy mind knows which system to hand a problem to; the same is true of a system design.
+
 ## Should you reach for one? A quick checklist
 
 - Does your code branch on the model's answer?
@@ -172,6 +178,7 @@ If that is mostly "yes", a decision model will make the feature smaller and more
 ## TL;DR
 
 - Chat models answer in prose you have to parse. A decision model answers in types you can branch on.
+- Jev is a "System 1" model in Kahneman's *Thinking, Fast and Slow* sense: fast intuition, not slow deliberation. Pair it with a System 2 model for the heavy thinking.
 - I built a two-stage support router: one call triages, the result picks the next set of questions, and the model's output becomes an object lookup.
 - The API blocks browsers and needs a key, so it runs behind a 40-line zero-dependency backend that keeps the key server-side.
 - Four realistic tickets routed correctly, in about 1.7 seconds and a hundredth of a cent each, with uncertainty surfaced as numbers.
