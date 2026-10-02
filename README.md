@@ -4,6 +4,8 @@
 
 A small, locally-run **decision pipeline** built on [TypeSafe Jev](https://typesafe.ai), the "System One" model that answers questions about text with *typed* decisions instead of prose. The name is a nod to Daniel Kahneman's *Thinking, Fast and Slow*: Jev is a **System 1** model, fast and intuitive snap judgments, rather than a slow, deliberate **System 2** reasoner.
 
+**Writeup:** [Stop Parsing LLM Output: routing on a System 1 decision model](writeups/stop-parsing-llm-output.md)
+
 A support ticket comes in. **Stage 1** triages it with three decisions in one call: a `choice` (which team), a `score` (urgency), and a `noul` (needs a human?). The app then reads the `choice` and, **in code**, routes to a team-specific **stage 2** that asks different questions depending on the route. Billing tickets get billing questions, security tickets get takeover questions, and so on.
 
 Every run makes **real, live Jev calls** through a tiny local backend. Your API key stays on your machine and is never committed.
