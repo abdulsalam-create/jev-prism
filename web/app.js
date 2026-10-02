@@ -18,9 +18,6 @@ Promise.all([
 });
 
 function reflectHealth(h){
-  const b = $("#keybadge");
-  b.textContent = h.key_set ? "● key loaded · " + h.model : "◦ no key";
-  b.className = "keybadge " + (h.key_set ? "ok" : "bad");
   if (!h.key_set){
     $("#note").innerHTML = "Backend has no key. Copy <code>.env.example</code> to <code>.env</code>, paste your Jev key, restart <code>server.py</code>.";
   }

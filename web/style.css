@@ -35,11 +35,6 @@ header{display:flex;gap:14px;align-items:center;justify-content:space-between;
   padding-bottom:18px;border-bottom:1px solid var(--line)}
 h1{font-size:19px;font-weight:650;margin:0;letter-spacing:-.02em}
 .tag{margin:4px 0 0;color:var(--mut);font-size:13px;max-width:62ch}
-.keybadge{font-family:var(--mono);font-size:11px;letter-spacing:.02em;
-  padding:4px 10px;border-radius:20px;border:1px solid var(--line-2);
-  color:var(--mut);white-space:nowrap;flex:none}
-.keybadge.ok{color:var(--pos);border-color:color-mix(in srgb,var(--pos) 45%,var(--line))}
-.keybadge.bad{color:var(--neg);border-color:color-mix(in srgb,var(--neg) 45%,var(--line))}
 
 .primer{margin:20px 0 22px;color:var(--mut);font-size:13.5px;max-width:74ch}
 .primer b{color:var(--fg);font-weight:600}
