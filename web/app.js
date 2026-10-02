@@ -28,7 +28,7 @@ function reflectHealth(h){
 
 function buildExamples(){
   $("#examples").innerHTML = SPEC.examples.map(e =>
-    `<button class="pbtn" data-id="${e.id}"><span class="ic">${e.icon}</span>${e.label}</button>`
+    `<button class="pbtn" data-id="${e.id}">${e.label}</button>`
   ).join("");
   $("#examples").addEventListener("click", ev => {
     const b = ev.target.closest(".pbtn"); if (!b) return;
@@ -122,7 +122,6 @@ function lens(name, q, a, isRoute){
   const head = `<div class="lhead">
       <span class="lname">${esc(name)}</span>
       <span class="ltype ${a.type}">${a.type}</span>
-      ${isRoute ? `<span class="routetag">routes stage 2</span>` : ""}
       ${a.confidence != null ? `<span class="conf">confidence ${pct(a.confidence)}</span>` : ""}
     </div>
     ${typeof q.instructions === "string" ? `<div class="instr">${esc(q.instructions)}</div>` : ""}`;
@@ -150,11 +149,11 @@ function scoreBody(a){
   return `
     <div class="scoreval"><b>${a.score.toFixed(2)}</b><span class="lvl">${esc(label)}</span></div>
     <div class="meter">
-      <div class="mtrack"></div>
-      <div class="needle" style="left:${left}%"></div>
-      <div class="mticks">${levels.map(l => `<span class="mtick">${l}</span>`).join("")}</div>
+      <div class="mfill" style="width:${left}%"></div>
+      <div class="mmark" style="left:${left}%"></div>
     </div>
-    <div class="legend">${levels.map(l => `<span><b>${l}</b> ${esc(a.legend[l])}</span>`).join("")}</div>`;
+    <div class="mticks">${levels.map(l => `<span>${l}</span>`).join("")}</div>
+    <div class="legend">${levels.map(l => `<span><b>${l}</b>${esc(a.legend[l])}</span>`).join("")}</div>`;
 }
 
 function noulBody(a){
