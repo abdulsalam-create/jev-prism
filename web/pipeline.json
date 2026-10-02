@@ -1,0 +1,151 @@
+{
+  "model": "jev-latest",
+  "title": "Support ticket triage pipeline",
+  "subtitle": "Every ticket is triaged, then routed to a team-specific second stage. Two live Jev calls per run; the route the code takes depends on the first call's answer.",
+
+  "stage1": {
+    "id": "triage",
+    "title": "Stage 1 · Triage",
+    "branch_on": "route",
+    "questions": {
+      "route": {
+        "type": "choice",
+        "instructions": "Route this support ticket to the right team.",
+        "criteria": {
+          "billing": "charges, refunds, invoices, payment methods, subscription cost",
+          "technical": "bugs, errors, outages, something not working",
+          "account": "login, access, password, profile, security settings",
+          "abuse": "threats, harassment, fraud reports, policy violations"
+        }
+      },
+      "urgency": {
+        "type": "score",
+        "instructions": "How urgently does the support team need to act?",
+        "criteria": ["Can wait a few days", "Handle this week", "Handle today", "Drop everything"]
+      },
+      "needs_human": {
+        "type": "noul",
+        "instructions": "Does this need a human agent rather than an automated reply?"
+      }
+    }
+  },
+
+  "branches": {
+    "billing": {
+      "title": "Stage 2 · Billing desk",
+      "questions": {
+        "subtype": {
+          "type": "choice",
+          "instructions": "What specific billing issue is this?",
+          "criteria": {
+            "double_charge": "charged more than once for the same thing",
+            "refund_request": "asking for money back",
+            "invoice_question": "a question about an invoice or receipt",
+            "cancel_or_downgrade": "wants to cancel or move to a cheaper plan"
+          }
+        },
+        "churn_risk": {
+          "type": "noul",
+          "instructions": "Is this customer at risk of cancelling or churning?",
+          "criteria": {"true": "threatens to leave, dispute, or cancel", "false": "patient and staying"}
+        },
+        "auto_refundable": {
+          "type": "noul",
+          "instructions": "Can this be resolved by an automated refund without manager approval?",
+          "criteria": {"true": "small, clearly justified refund", "false": "disputed, large, or needs review"}
+        }
+      }
+    },
+    "technical": {
+      "title": "Stage 2 · Engineering",
+      "questions": {
+        "area": {
+          "type": "choice",
+          "instructions": "Which area does this technical issue fall under?",
+          "criteria": {
+            "outage": "service is down or unreachable",
+            "functional_bug": "a feature behaves incorrectly",
+            "performance": "slow, timeouts, degraded",
+            "data_integrity": "wrong, missing, or corrupted data"
+          }
+        },
+        "severity": {
+          "type": "score",
+          "instructions": "Rate the engineering severity.",
+          "criteria": ["Cosmetic", "Minor", "Major", "Critical outage"]
+        },
+        "is_regression": {
+          "type": "noul",
+          "instructions": "Does the user indicate this used to work and recently broke?"
+        }
+      }
+    },
+    "account": {
+      "title": "Stage 2 · Account & security",
+      "questions": {
+        "issue": {
+          "type": "choice",
+          "instructions": "What account issue is the user reporting?",
+          "criteria": {
+            "cannot_login": "unable to sign in",
+            "password_reset": "needs to reset a password",
+            "mfa_problem": "trouble with two-factor or authenticator",
+            "profile_change": "wants to change email, name, or settings"
+          }
+        },
+        "security_sensitive": {
+          "type": "noul",
+          "instructions": "Could this be an account-takeover or unauthorized-access situation?",
+          "criteria": {"true": "unexpected password/email change, locked out, suspicious access", "false": "ordinary self-service request"}
+        },
+        "verify_identity": {
+          "type": "noul",
+          "instructions": "Should we require extra identity verification before acting on this?"
+        }
+      }
+    },
+    "abuse": {
+      "title": "Stage 2 · Trust & safety",
+      "questions": {
+        "kind": {
+          "type": "choice",
+          "instructions": "What kind of abuse report is this?",
+          "criteria": {
+            "harassment": "targeted harassment or bullying",
+            "threat": "threat of harm",
+            "fraud": "scam or fraudulent activity",
+            "spam": "unsolicited bulk content"
+          }
+        },
+        "credible_threat": {
+          "type": "noul",
+          "instructions": "Is there a credible threat to someone's safety?"
+        },
+        "escalation": {
+          "type": "score",
+          "instructions": "How far should this be escalated?",
+          "criteria": ["Log only", "Review today", "Escalate to trust & safety", "Emergency escalation"]
+        }
+      }
+    }
+  },
+
+  "examples": [
+    {
+      "id": "billing", "label": "Billing", "icon": "✉",
+      "state": "I was charged twice for my annual plan this morning and I have emailed support three times with no reply. If this is not fixed today I am disputing the charge with my bank and cancelling."
+    },
+    {
+      "id": "outage", "label": "Outage", "icon": "▲",
+      "state": "Your checkout API has been returning 503 for the last ten minutes and our customers cannot pay. This was working fine an hour ago. We are losing sales every minute this is down."
+    },
+    {
+      "id": "takeover", "label": "Locked out", "icon": "⚷",
+      "state": "I just got an email that my password and recovery address were changed, but it was not me. Now I cannot log in at all and there is a new device on my account. Please help, I think someone broke in."
+    },
+    {
+      "id": "threat", "label": "Abuse report", "icon": "⚑",
+      "state": "A user keeps messaging me through your platform saying he knows where I live and will come to my house this weekend. I have screenshots. I am genuinely scared for my safety."
+    }
+  ]
+}

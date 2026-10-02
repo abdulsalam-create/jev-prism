@@ -1,53 +1,58 @@
-# Prism
+# Jev Pipeline
 
-**Drop in any text and watch [TypeSafe Jev](https://typesafe.ai) split it into *typed decisions*.**
+A small, locally-run **decision pipeline** built on [TypeSafe Jev](https://typesafe.ai), the "System One" model that answers questions about text with *typed* decisions instead of prose.
 
-Live: **https://abdulsalam-create.github.io/jev-prism/**
+A support ticket comes in. **Stage 1** triages it with three decisions in one call: a `choice` (which team), a `score` (urgency), and a `noul` (needs a human?). The app then reads the `choice` and, **in code**, routes to a team-specific **stage 2** that asks different questions depending on the route. Billing tickets get billing questions, security tickets get takeover questions, and so on.
 
-Most language models answer in prose you then have to parse. Jev (TypeSafe's "System One" decision model) answers in **types**: ask a question about some text and it returns a decision you can branch on directly, with the probabilities behind it. Prism showcases all three of Jev's primitives at once, on real content, in a single API call per example:
+Every run makes **real, live Jev calls** through a tiny local backend. Your API key stays on your machine and is never committed.
 
-| Primitive | Returns | Prism shows it as |
-|---|---|---|
-| `choice` | one labelled option + a probability for every option | routing bars, winner highlighted |
-| `score` | a rating that lands *between* ordered rubric levels, weighted by probability | a meter with a needle sitting between the level ticks |
-| `noul` | a single yes/no probability from 0 to 1 | a yes/no gauge |
+```
+browser (localhost)  ->  server.py  (holds your key)  ->  Jev API  ->  back
+```
 
-Each lens also surfaces the model's **confidence**, **latency**, **input tokens** and **cost** - the uncertainty most LLM demos hide.
+## Why there is a backend
 
-### The five lenses
-A support email (route · urgency · needs-human · churn-risk), a product review (sentiment · topic · defect · recommend), a social mention (intent · brand-risk · **sarcasm** · respond), a pull request (type · review-priority · touches-auth · has-tests), and an incident alert (severity · component · page-oncall · customer-facing). Every question set is a real, practical use of the model - triage, moderation, code review, on-call.
+Jev's API blocks browser origins (CORS) and must see your secret key. A browser therefore cannot call it directly, and a public static page cannot safely hold a key. So `server.py` does two things: it serves the frontend in `web/`, and it exposes `POST /api/decide`, which attaches your key server-side and forwards the request to Jev. The browser only ever talks to `127.0.0.1`, so there is no CORS problem and the key never reaches the page.
 
-## How it reaches Jev (and why the key is safe)
+## Run it
 
-Jev's API **blocks all browser origins** (CORS) and must see your API key server-side, so a static page can't call it directly. Prism is therefore a **hybrid**:
+Requires Python 3 only. No pip installs, no npm.
 
-- **Out of the box** it replays *real* responses captured from the Jev API (`docs/data/samples.json`) - no key anywhere, works instantly on GitHub Pages.
-- **Go live** on your own text by pointing Prism at the included Cloudflare Worker, which holds your key as a secret. Click **◦ offline → ● live**, paste the Worker URL (stored only in your browser), and edit any example.
-
-**No API key is ever committed to this repo or shipped to the browser.**
-
-### Deploy the live proxy (optional, free tier)
 ```bash
-cd worker
-npm i -g wrangler
-wrangler login
-wrangler secret put JEV_KEY     # paste your TypeSafe key when prompted
-wrangler deploy
+git clone https://github.com/abdulsalam-create/jev-prism
+cd jev-prism
+cp .env.example .env          # then paste your Jev key into .env
+python3 server.py             # serves http://127.0.0.1:8000
 ```
-Copy the printed `https://jev-prism.<you>.workers.dev` URL into Prism's **Go live** dialog. To lock the proxy to your own page, set `ALLOW_ORIGIN` in `worker/worker.js` to your Pages origin before deploying.
 
-## Re-capturing the samples
-`capture.py` (in the repo history / scratch) runs each preset through `POST /v1/systemone` and writes `docs/data/samples.json`. The file contains only prompt text and model answers - never a key.
+Open **http://127.0.0.1:8000**, pick an example ticket (or paste your own), and click **Run pipeline**. You get your own key from the [TypeSafe dashboard](https://typesafe.ai).
 
-## Layout
+## What each decision type looks like
+
+| Type | Jev returns | Shown as |
+|---|---|---|
+| `choice` | the chosen option + a probability for every option + confidence | bars, winner highlighted |
+| `score` | a value that lands *between* ordered rubric levels, weighted by probability | a meter with a needle between the level ticks |
+| `noul` | one yes/no probability from 0 to 1 | a yes/no gauge |
+
+The stage-1 question that drives the routing is flagged **routes stage 2**, so you can see the model's output become the program's control flow.
+
+## Files
+
 ```
-docs/            GitHub Pages site (static)
-  index.html     one screen
-  style.css      theme-aware, responsive
-  app.js         renders the three lens types from the API shape
-  data/samples.json   real captured Jev responses
-worker/          Cloudflare Worker proxy (holds the key as a secret)
+server.py            stdlib backend: serves web/ + proxies /api/decide to Jev
+.env.example         copy to .env and add your key (.env is gitignored)
+web/
+  index.html         page
+  style.css          theme-aware, responsive
+  app.js             orchestrates the pipeline and renders the three lens types
+  pipeline.json      the pipeline: stage-1 questions, per-route stage-2 questions, examples
 ```
+
+## Extending it
+
+The whole pipeline is declarative in `web/pipeline.json`. Add a route to `stage1.questions.route.criteria`, add a matching entry under `branches`, and the app will route to it with no code change. Swap in a different domain (content moderation, lead scoring, PR triage) by replacing that one file.
 
 ## Credits
-Decisions by [TypeSafe Jev](https://typesafe.ai) · `POST /v1/systemone`. Built as a demo of the model.
+
+Decisions by [TypeSafe Jev](https://typesafe.ai) · `POST /v1/systemone`.

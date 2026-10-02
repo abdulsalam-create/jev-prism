@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Jev Pipeline</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><circle cx='4' cy='8' r='2.3' fill='none' stroke='%232563eb' stroke-width='1.2'/><path d='M6 8h4M10 8l-2-2M10 8l-2 2' stroke='%232563eb' stroke-width='1.2' fill='none'/><circle cx='12.5' cy='8' r='1.4' fill='%232563eb'/></svg>">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1 id="title">Jev Pipeline</h1>
+      <p id="subtitle" class="tag"></p>
+    </div>
+    <span id="keybadge" class="keybadge">…</span>
+  </header>
+
+  <p class="primer">A <b>decision pipeline</b> built on TypeSafe's <a href="https://typesafe.ai" target="_blank" rel="noopener">Jev</a> model. Stage 1 triages the ticket with a <code>choice</code> + <code>score</code> + <code>noul</code>. The app then reads the <code>choice</code> and, in code, routes to a team-specific stage 2 with different questions. Each run makes real, live Jev calls through the local backend, so the key stays on your machine.</p>
+
+  <section class="io">
+    <div class="pane">
+      <label class="plabel">Support ticket</label>
+      <nav id="examples" aria-label="Examples"></nav>
+      <textarea id="state" spellcheck="false" aria-label="Ticket text"></textarea>
+      <div class="actions">
+        <button id="run" class="run">Run pipeline</button>
+        <span id="note" class="note"></span>
+      </div>
+    </div>
+  </section>
+
+  <div id="flow" class="flow"></div>
+  <div id="summary" class="summary"></div>
+
+  <footer>
+    <span>Decisions by <a href="https://typesafe.ai" target="_blank" rel="noopener">TypeSafe Jev</a> · <code>POST /v1/systemone</code></span>
+    <span><a href="https://github.com/abdulsalam-create/jev-prism" target="_blank" rel="noopener">source on GitHub</a></span>
+  </footer>
+</main>
+<script src="app.js"></script>
+</body>
+</html>
