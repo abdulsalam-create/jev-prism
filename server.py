@@ -1,23 +1,6 @@
 #!/usr/bin/env python3
-"""
-Local backend for Jev Pipeline.
-
-Why a backend at all: the browser cannot call TypeSafe's Jev API directly
-(the API blocks browser origins via CORS) and must never see your secret key.
-So this tiny server does two jobs:
-
-  1. serves the static frontend in ./web
-  2. exposes POST /api/decide, which attaches your JEV_API_KEY server-side and
-     forwards the request to Jev, then returns Jev's answer to the page.
-
-The browser only ever talks to http://127.0.0.1 (same origin), so there is no
-CORS problem, and the key stays on your machine. Stdlib only, no pip installs.
-
-Run:
-    cp .env.example .env     # then paste your key into .env
-    python3 server.py
-    # open http://127.0.0.1:8000
-"""
+# Serves ./web and proxies POST /api/decide to Jev with the key from .env,
+# so the key stays server-side and the browser avoids the CORS block. Stdlib only.
 import json
 import os
 import mimetypes
@@ -30,7 +13,6 @@ WEB_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "web")
 
 
 def load_dotenv(path=".env"):
-    """Minimal .env loader so there are no dependencies. Real env wins."""
     if not os.path.exists(path):
         return
     for line in open(path, encoding="utf-8"):
@@ -48,8 +30,6 @@ PORT = int(os.environ.get("PORT", "8000"))
 
 
 def call_jev(payload):
-    """Forward a decision request to Jev with the server-side key.
-    Returns (http_status, parsed_json)."""
     body = json.dumps({
         "state": payload.get("state", ""),
         "model": payload.get("model") or MODEL,
@@ -63,7 +43,6 @@ def call_jev(payload):
         with urllib.request.urlopen(req, timeout=40) as r:
             return r.status, json.loads(r.read())
     except urllib.error.HTTPError as e:
-        # Pass Jev's own error through so the UI can show it.
         try:
             return e.code, json.loads(e.read())
         except Exception:
@@ -84,7 +63,6 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path == "/api/health":
             return self._send(200, {"key_set": bool(KEY), "model": MODEL})
-        # static files out of ./web, with path-traversal protection
         rel = self.path.split("?", 1)[0].lstrip("/") or "index.html"
         full = os.path.normpath(os.path.join(WEB_DIR, rel))
         if not full.startswith(WEB_DIR) or not os.path.isfile(full):
@@ -107,7 +85,7 @@ class Handler(BaseHTTPRequestHandler):
         status, resp = call_jev(payload)
         return self._send(status, resp)
 
-    def log_message(self, *a):  # keep the console quiet
+    def log_message(self, *a):
         pass
 
 

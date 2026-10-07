@@ -1,10 +1,10 @@
 "use strict";
 const $ = s => document.querySelector(s);
-const PRICE_PER_MTOK = 0.042;          // USD per 1M input tokens
+const PRICE_PER_MTOK = 0.042; // USD per 1M input tokens
 
 let SPEC = null;
 
-/* ---------- boot ---------- */
+
 Promise.all([
   fetch("pipeline.json").then(r => r.json()),
   fetch("/api/health").then(r => r.json()).catch(() => ({ key_set: false })),
@@ -34,7 +34,7 @@ function buildExamples(){
   });
 }
 
-/* ---------- one Jev call via the local backend ---------- */
+
 async function decide(state, questions){
   const t0 = performance.now();
   const r = await fetch("/api/decide", {
@@ -47,7 +47,7 @@ async function decide(state, questions){
   return { resp: json, ms };
 }
 
-/* ---------- run the pipeline ---------- */
+
 $("#run").addEventListener("click", run);
 async function run(){
   const state = $("#state").value.trim();
@@ -58,19 +58,16 @@ async function run(){
   const totals = { calls: 0, ms: 0, tok: 0 };
 
   try {
-    // Stage 1: triage
     const s1 = SPEC.stage1;
     const a1 = await decide(state, s1.questions);
     tally(totals, a1);
     renderStage(s1.title, s1.questions, a1.resp, a1.ms, s1.branch_on);
 
-    // Code logic: pick the branch from stage 1's choice answer.
     const routeName = a1.resp.answers[s1.branch_on].choice;
     const branch = SPEC.branches[routeName];
     renderArrow(s1.branch_on, routeName, branch ? branch.title : "(no matching branch)");
     if (!branch){ finish(btn); return; }
 
-    // Stage 2: the team-specific questions chosen by the route.
     const a2 = await decide(state, branch.questions);
     tally(totals, a2);
     renderStage(branch.title, branch.questions, a2.resp, a2.ms, null);
@@ -84,7 +81,7 @@ async function run(){
 function finish(btn){ btn.disabled = false; btn.textContent = "Run pipeline"; }
 function tally(t, a){ t.calls++; t.ms += a.ms; t.tok += (a.resp.usage && a.resp.usage.input_tokens) || 0; }
 
-/* ---------- rendering ---------- */
+
 function renderStage(title, questions, resp, ms, branchOn){
   const ans = resp.answers;
   const lenses = Object.keys(questions).map(name =>
@@ -164,6 +161,6 @@ function noulBody(a){
     </div>`;
 }
 
-/* ---------- utils ---------- */
+
 function pct(v){ return (v * 100).toFixed(v >= 0.995 || v === 0 ? 0 : 1).replace(/\.0$/, "") + "%"; }
 function esc(s){ return String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c])); }
